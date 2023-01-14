@@ -1,6 +1,13 @@
-library(rockchalk) #Multivariate normal sampling
-library(tidyverse) #Figures and table management
-library(cowplot) #Produces multi-pane keys
+#' Generate Student Data From File
+#'
+#' The DataSimulatoR function creates data files (.csv) for students and grading keys (.pdf) based off of student responses to survey found on github.com/LiamOMueller/UCSanDiego_BILD5
+#' @param x A data frame object from the student survey. Number of rows should be equal to number of responses, Number of columns should be equal to 33.
+#' @return A series of csv files for students and pdf grading keys
+#' @import cowplot
+#' @import rockchalk
+#' @import tidyr
+#' @import ggplot2
+#' @export
 DataSimulatoR <- function(x){
 BILD_Data<-x[,-1]
 names<-paste(BILD_Data[,5],".csv",sep="") #Names to give write.csv later on.
@@ -95,21 +102,21 @@ for(i in 1:length(BILD_Data[,4])){
     #make the figures
 
     figdata<-as.data.frame(resdat)
-    tidyfigdata<-pivot_longer(data = figdata[,1:2],cols = 1:2,names_to = "group",values_to = "response")
+    tidyfigdata<-tidyr::pivot_longer(data = figdata[,1:2],cols = 1:2,names_to = "group",values_to = "response")
     if(BILD_Data[i,32]<40){
       bins<-15
     }else{
       bins<-30
     }
-    histX <- ggplot(figdata, aes(x=resultX))+
+    histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
       geom_histogram(bins = bins,fill="navyblue")+
       theme_minimal_grid()+
       xlab(nameofX)
-    histY<-ggplot(figdata,aes(x=resultY))+
+    histY<-ggplot2::ggplot(figdata,aes(x=resultY))+
       geom_histogram(bins = bins,fill="navyblue")+
       theme_minimal_grid()+
       xlab(nameofY)
-    fig<-ggplot(tidyfigdata, aes(x=group,y = response))+
+    fig<-ggplot2::ggplot(tidyfigdata, aes(x=group,y = response))+
       geom_boxplot()+
       theme_classic()+
       scale_x_discrete(labels=c("resultX" = nameofX,"resultY"=nameofY))+
@@ -124,7 +131,7 @@ for(i in 1:length(BILD_Data[,4])){
     xaxis<-1:10
     yaxis<-1:10
     tplotdat<-data.frame(xaxis,yaxis)
-    text<-ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
+    text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
       annotate("text",x = 2,y = 10,label="Tests for Normallity")+
       annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
       annotate("text",x = 1.2,y = 9.5,label="p val of X =")+
@@ -149,8 +156,8 @@ for(i in 1:length(BILD_Data[,4])){
       xlim(c(0,10))+
       ylim(c(0,10))
 
-    plotgrid<-plot_grid( histX,histY,fig,text,nrow = 2,ncol = 2)
-    ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
+    plotgrid<-cowplot::plot_grid( histX,histY,fig,text,nrow = 2,ncol = 2)
+    ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
   }
    #####ANOVA#####
   if(BILD_Data[i,7]=="ANOVA (3 levels)"){
@@ -226,7 +233,7 @@ for(i in 1:length(BILD_Data[,4])){
    ksZpval<-ks.test(resdat[,3],pnorm,mean(resdat[,3]),sd(resdat[,3]))$p.value
 
    figdata<-as.data.frame(resdat)
-   tidydata<-pivot_longer(data = figdata,cols = 1:3,names_to = "group",values_to = "response")
+   tidydata<-tidyr::pivot_longer(data = figdata,cols = 1:3,names_to = "group",values_to = "response")
 
    model<-lm(tidydata$response~tidydata$group)
    modsum<-summary(model)
@@ -249,19 +256,19 @@ for(i in 1:length(BILD_Data[,4])){
    }else{
      bins<-30
    }
-   histX <- ggplot(figdata, aes(x=resultX))+
+   histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
      geom_histogram(bins = bins,fill="navyblue")+
      theme_minimal_grid()+
      xlab(nameofX)
-   histY<-ggplot(figdata,aes(x=resultY))+
+   histY<-ggplot2::ggplot(figdata,aes(x=resultY))+
      geom_histogram(bins = bins,fill="navyblue")+
      theme_minimal_grid()+
      xlab(nameofY)
-   histZ<-ggplot(figdata,aes(x=resultZ))+
+   histZ<-ggplot2::ggplot(figdata,aes(x=resultZ))+
      geom_histogram(bins = bins,fill="navyblue")+
      theme_minimal_grid()+
      xlab(nameofZ)
-   fig<-ggplot(tidydata, aes(x=group,y = response))+
+   fig<-ggplot2::ggplot(tidydata, aes(x=group,y = response))+
      geom_boxplot()+
      theme_classic()+
      scale_x_discrete(labels=c("resultX" = nameofX,"resultY"=nameofY,"resultZ"=nameofZ))+
@@ -276,7 +283,7 @@ for(i in 1:length(BILD_Data[,4])){
    xaxis<-1:10
    yaxis<-1:10
    tplotdat<-data.frame(xaxis,yaxis)
-   text<-ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
+   text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
      annotate("text",x = 2,y = 10,label="Tests for Normallity")+
      annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
      annotate("text",x = 1.2,y = 9.5,label="p val of X =")+
@@ -301,7 +308,7 @@ for(i in 1:length(BILD_Data[,4])){
      ylim(c(0,10))
 
  #Add a tukey test
-   text2<-ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
+   text2<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
      annotate("text",x = 5,y = 10,label="Tukey Honest Significant Difference")+
      annotate("text",x = 2,y = 9,label="Comparison")+
      annotate("text",x = 2,y = 8,label=paste(nameofZ,nameofX,sep = "-"))+
@@ -322,8 +329,8 @@ for(i in 1:length(BILD_Data[,4])){
      xlim(c(0,10))+
      ylim(c(4,10))
 
-   plotgrid<-plot_grid( histX,histY,histZ,fig,text,text2,nrow = 2,ncol = 3)
-   ggsave(filename = fignames[i],plot = plotgrid,width = 15,height = 10,units = "in")
+   plotgrid<-cowplot::plot_grid( histX,histY,histZ,fig,text,text2,nrow = 2,ncol = 3)
+   ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 15,height = 10,units = "in")
    }
 
    #####Paired t#####
@@ -404,21 +411,21 @@ for(i in 1:length(BILD_Data[,4])){
 
     figdata<-as.data.frame(resdat)
     rawdat<-as.data.frame(predelta)
-    tidyfigdata<-pivot_longer(data = figdata[,1:2],cols = 1:2,names_to = "group",values_to = "response")
+    tidyfigdata<-tidyr::pivot_longer(data = figdata[,1:2],cols = 1:2,names_to = "group",values_to = "response")
     if(BILD_Data[i,32]<40){
       bins<-15
     }else{
       bins<-30
     }
-    histdelta <- ggplot(figdata, aes(x=deltacol))+
+    histdelta <- ggplot2::ggplot(figdata, aes(x=deltacol))+
       geom_histogram(bins = bins,fill="navyblue")+
       theme_minimal_grid()+
       xlab('Delta')
-    histpredelta<-ggplot(rawdat,aes(x=predelta))+
+    histpredelta<-ggplot2::ggplot(rawdat,aes(x=predelta))+
       geom_histogram(bins = bins,fill="navyblue")+
       theme_minimal_grid()+
       xlab('Delta')
-    fig<-ggplot(tidyfigdata, aes(x=group,y = response))+
+    fig<-ggplot2::ggplot(tidyfigdata, aes(x=group,y = response))+
       geom_boxplot()+
       theme_classic()+
       scale_x_discrete(labels=c("resultX" = nameofX,"resultY"=nameofY))+
@@ -433,7 +440,7 @@ for(i in 1:length(BILD_Data[,4])){
     xaxis<-1:10
     yaxis<-1:10
     tplotdat<-data.frame(xaxis,yaxis)
-    text<-ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
+    text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
       annotate("text",x = 2,y = 10,label="Tests for Normallity")+
       annotate("text",x = 3,y = 9.5,label=round(ksDeltapval,4))+
       annotate("text",x = 1.5,y = 9.5,label="p val =")+
@@ -456,8 +463,8 @@ for(i in 1:length(BILD_Data[,4])){
       xlim(c(0,10))+
       ylim(c(0,10))
 
-    plotgrid<-plot_grid( histpredelta,histdelta,fig,text,nrow = 2,ncol = 2)
-    ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
+    plotgrid<-cowplot::plot_grid( histpredelta,histdelta,fig,text,nrow = 2,ncol = 2)
+    ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
   }
    #####Chi Squared#####
   if(BILD_Data[i,7]=="Chi-Squared test"){
@@ -497,14 +504,14 @@ for(i in 1:length(BILD_Data[,4])){
   dat<-data.frame(group,response)
   chidat<-table(group,response)
   chitest<-chisq.test(chidat)
-  sqplot<-ggplot(data=dat,mapping = aes(x=group,fill=response))+
+  sqplot<-ggplot2::ggplot(data=dat,mapping = aes(x=group,fill=response))+
     geom_bar()+
     theme_minimal()
 
   xaxis<-1:10
   yaxis<-1:10
   tplotdat<-data.frame(xaxis,yaxis)
-  text<-ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
+  text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
     annotate("text",x = 2,y = 10,label="Probability of each group")+
     annotate("text",x = 1.8,y = 9.5,label=paste("p of",nameofX,round(sum(Group1TorF)/length(Group1TorF),4),sep=" "))+
     annotate("text",x = 1.8,y = 9,label=paste("p of",nameofY,round(sum(Group2TorF)/length(Group2TorF),4),sep=" "))+
@@ -521,8 +528,8 @@ for(i in 1:length(BILD_Data[,4])){
 
   text
 
-  plotgrid<-plot_grid(sqplot,text,nrow = 1,ncol = 2)
-  ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 5,units = "in")
+  plotgrid<-cowplot::plot_grid(sqplot,text,nrow = 1,ncol = 2)
+  ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 5,units = "in")
   write.csv(x = dat,file = names[i])
   }
 
@@ -567,8 +574,8 @@ for(i in 1:length(BILD_Data[,4])){
 
 nameofX <- BILD_Data[i,21] #define from table
 nameofY <- BILD_Data[i,22] #define from table
-Sigma<-lazyCov(Rho = rho, Sd = Sds,d=2) #Lazy covariance matrix
-rawvals<-mvrnorm(n=n,mu=mu,Sigma=Sigma) # Create the data
+Sigma<-rockchalk::lazyCov(Rho = rho, Sd = Sds,d=2) #Lazy covariance matrix
+rawvals<-rockchalk::mvrnorm(n=n,mu=mu,Sigma=Sigma) # Create the data
 tempX<-rawvals[,1] #X data from mvnorm
 tempY<-rawvals[,2] #Y data from mvnorm
 
@@ -645,15 +652,15 @@ if(BILD_Data[i,32]<40){
 }else{
   bins<-30
 }
-histX <- ggplot(figdata, aes(x=resultX))+
+histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
   geom_histogram(bins = bins,fill="navyblue")+
   theme_minimal_grid()+
   xlab(nameofX)
-histY<- ggplot(figdata, aes(x=resultY))+
+histY<- ggplot2::ggplot(figdata, aes(x=resultY))+
   geom_histogram(bins = bins,fill="navyblue")+
   theme_minimal_grid()+
   xlab(nameofY)
-fig<-ggplot(figdata, aes(x=resultX,y = resultY))+
+fig<-ggplot2::ggplot(figdata, aes(x=resultX,y = resultY))+
   geom_point()+
   theme_classic()+
   geom_smooth(method = lm)+
@@ -668,7 +675,7 @@ if(BILD_Data[i,4] %% 2==0){
 xaxis<-1:10
 yaxis<-1:10
 tplotdat<-data.frame(xaxis,yaxis)
-  text<-ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
+  text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
     annotate("text",x = 2,y = 10,label="Tests for Normallity")+
     annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
     annotate("text",x = 1.5,y = 9.5,label="p val of X =")+
@@ -692,8 +699,8 @@ tplotdat<-data.frame(xaxis,yaxis)
     xlim(c(0,10))+
     ylim(c(0,10))
 
-plotgrid<-plot_grid(histX,histY,fig,text,nrow = 2,ncol = 2)
-ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
+plotgrid<-cowplot::plot_grid(histX,histY,fig,text,nrow = 2,ncol = 2)
+ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
   }
 
    #####Correlation####
@@ -735,8 +742,8 @@ ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in
 
     nameofX <- BILD_Data[i,19] #define from table
     nameofY <- BILD_Data[i,20] #define from table
-    Sigma<-lazyCov(Rho = rho, Sd = Sds,d=2) #Lazy covariance matrix
-    rawvals<-mvrnorm(n=n,mu=mu,Sigma=Sigma) # Create the data
+    Sigma<-rockchalk::lazyCov(Rho = rho, Sd = Sds,d=2) #Lazy covariance matrix
+    rawvals<-rockchlak::mvrnorm(n=n,mu=mu,Sigma=Sigma) # Create the data
     tempX<-rawvals[,1] #X data from mvnorm
     tempY<-rawvals[,2] #Y data from mvnorm
 
@@ -810,15 +817,15 @@ ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in
     }else{
       bins<-30
     }
-    histX <- ggplot(figdata, aes(x=resultX))+
+    histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
       geom_histogram(bins = bins,fill="navyblue")+
       theme_minimal_grid()+
       xlab(nameofX)
-    histY<- ggplot(figdata, aes(x=resultY))+
+    histY<- ggplot2::ggplot(figdata, aes(x=resultY))+
       geom_histogram(bins = bins,fill="navyblue")+
       theme_minimal_grid()+
       xlab(nameofY)
-    fig<-ggplot(figdata, aes(x=resultX,y = resultY))+
+    fig<-ggplot2::ggplot(figdata, aes(x=resultX,y = resultY))+
       geom_point()+
       theme_classic()+
       geom_smooth(method = lm)+
@@ -833,7 +840,7 @@ ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in
     xaxis<-1:10
     yaxis<-1:10
     tplotdat<-data.frame(xaxis,yaxis)
-    text<-ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
+    text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
       annotate("text",x = 2,y = 10,label="Tests for Normallity")+
       annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
       annotate("text",x = 1.5,y = 9.5,label="p val of X =")+
@@ -856,8 +863,10 @@ ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in
       xlim(c(0,10))+
       ylim(c(0,10))
 
-    plotgrid<-plot_grid(histX,histY,fig,text,nrow = 2,ncol = 2)
-    ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
+    plotgrid<-cowplot::plot_grid(histX,histY,fig,text,nrow = 2,ncol = 2)
+    ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
   }
 }
 }
+
+
