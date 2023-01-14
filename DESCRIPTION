@@ -1,0 +1,14 @@
+Package: DataSimulatoR
+Type: Package
+Title: Generating Data and Grading Keys From Studnet Survey Responses
+Version: 0.1.0
+Author: Liam O'Connor Mueller, Keefe Reuther
+Maintainer: Liam O'Connor Mueller <lomueller@ucsd.edu>
+Description: The DataSimulatoR function creates data files (.csv) for students and grading keys (.pdf) for instructors based off of student response to survey.
+Imports: rockchalk,
+         cowplot,
+         tidyverse
+License: GNU_GPL v3.0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
