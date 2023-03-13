@@ -9,7 +9,7 @@
 #' @import ggplot2
 #' @export
 DataSimulatoR <- function(x){
-BILD_Data<-x[,-1]
+BILD_Data<-x
 names<-paste(BILD_Data[,5],".csv",sep="") #Names to give write.csv later on.
 fignames<-paste(BILD_Data[,3],"_",BILD_Data[,2],".pdf",sep="")#Names for the key figures
 
