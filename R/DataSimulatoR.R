@@ -743,7 +743,7 @@ ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,un
     nameofX <- BILD_Data[i,19] #define from table
     nameofY <- BILD_Data[i,20] #define from table
     Sigma<-rockchalk::lazyCov(Rho = rho, Sd = Sds,d=2) #Lazy covariance matrix
-    rawvals<-rockchlak::mvrnorm(n=n,mu=mu,Sigma=Sigma) # Create the data
+    rawvals<-rockchalk::mvrnorm(n=n,mu=mu,Sigma=Sigma) # Create the data
     tempX<-rawvals[,1] #X data from mvnorm
     tempY<-rawvals[,2] #Y data from mvnorm
 
