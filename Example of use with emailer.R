@@ -1,3 +1,4 @@
+###Error with negative values and teh lazy correlation matrix. Must look into!
 devtools::install_github("LiamOMueller/UCSanDiego_BILD5")
 
 
