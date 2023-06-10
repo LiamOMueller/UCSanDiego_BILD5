@@ -90,7 +90,7 @@ for(i in 1:length(BILD_Data[,4])){
 
     #test for normal
     ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
-    ksYpval<-ks.test(resdat[,2],pnorm,mean(resdat[,2]),sd(resdat[,2]))$p.value
+    ksYpval<-ks.test(resdat[-outlierrow,2],pnorm,mean(resdat[-outlierrow,2]),sd(resdat[-outlierrow,2]))$p.value #KS test does not like the outliers!
 
     model<-t.test(resdat[,1],resdat[,2])
     MeanDelta<-model$estimate[1]-model$estimate[2]
@@ -192,7 +192,7 @@ for(i in 1:length(BILD_Data[,4])){
      transformY<-Y
      transformY[round(length(Y)/4)]<-muY*10.2
      transformZ<-Z
-     transformZ[round(length(Z)/4)]<-muZ*20.2
+     transformZ[round(length(Z)/4)]<-muZ*20.2 #This should be fixed in future classes!
      transformX <- X
 
    }
@@ -218,7 +218,7 @@ for(i in 1:length(BILD_Data[,4])){
    resultY <- finalY
    resultZ <- finalZ
    resultdata <- cbind(resultX,resultY,resultZ)
-   if(BILD_Data[i,4] %% 2!=0){ #remove the outlier that was put in if the pid was odd, else transform exp data
+   if(BILD_Data[i,4] %% 2!=0){ #remove the outlier that was put in if the pid was odd, else transform exp data, Outlers are in the Y
      outlierrow<-(round(length(resultdata[,2])/4))
      resdat<-resultdata[-outlierrow,]
    }else{
