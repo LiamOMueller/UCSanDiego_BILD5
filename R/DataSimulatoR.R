@@ -78,6 +78,7 @@ for(i in 1:length(BILD_Data[,4])){
 
     resultX <- finalX
     resultY <- finalY
+    resultdata <- cbind(resultX,resultY)
     if(BILD_Data[i,4] %% 2!=0){ #remove the outlier that was put in if the pid was odd, else transform exp data
       outlierrow<-(round(length(resultdata[,2])/4))
       resultY[outlierrow]<-NA #The outlier is always in Y
