@@ -340,7 +340,7 @@ for(i in 1:length(BILD_Data[,4])){
 
    #####Paired t#####
 
-  if(BILD_Data[i,7]=="Paired t-test"){
+  if(BILD_Data[i,7]=="paired t-test"){
     if(BILD_Data[i,4] %% 2==0){
       minX<-log(BILD_Data[i,29]+0.001)
       muX<-log(BILD_Data[i,31]+0.001)
@@ -472,7 +472,7 @@ for(i in 1:length(BILD_Data[,4])){
     ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
   }
    #####Chi Squared#####
-  if(BILD_Data[i,7]=="Chi-Squared test"){
+  if(BILD_Data[i,7]=="chi-Squared test"){
 
   n <- BILD_Data[i,32] #Sample size, Define from table
   Group1True <- BILD_Data[i,12] #P for group 1, Define from table
@@ -541,7 +541,7 @@ for(i in 1:length(BILD_Data[,4])){
 
 
    #####linear regression#####
-  if(BILD_Data[i,7]=="Linear regression"){
+  if(BILD_Data[i,7]=="linear regression"){
 
     if(BILD_Data[i,4] %% 2==0){ #If the PID is even they get skewed data
       minX<-BILD_Data[i,25] #minimum X value
@@ -709,7 +709,7 @@ ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,un
   }
 
    #####Correlation####
-  if(BILD_Data[i,7]=="Correlation"){
+  if(BILD_Data[i,7]=="correlation"){
 
     if(BILD_Data[i,4] %% 2==0){ #If the PID is even they get skewed data
       minX<-BILD_Data[i,25] #minimum X value
