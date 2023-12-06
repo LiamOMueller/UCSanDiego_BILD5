@@ -82,15 +82,19 @@ for(i in 1:length(BILD_Data[,4])){
       outlierrow<-(round(length(resultdata[,2])/4))
       resultY[outlierrow]<-NA #The outlier is always in Y
       resdat<-cbind(resultX,resultY) #
+      #test for normal
+    ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
+    ksYpval<-ks.test(resdat[-outlierrow,2],pnorm,mean(resdat[-outlierrow,2]),sd(resdat[-outlierrow,2]))$p.value #KS test does not like the outliers!
     }else{
       resultX<-log(resultX)
       resultY<-log(resultY)
       resdat<-cbind(resultX,resultY)
+      #test for normal
+    ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
+    ksYpval<-ks.test(resdat[,2],pnorm,mean(resdat[,2]),sd(resdat[,2]))$p.value #KS test does not like the outliers!
     }
 
-    #test for normal
-    ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
-    ksYpval<-ks.test(resdat[-outlierrow,2],pnorm,mean(resdat[-outlierrow,2]),sd(resdat[-outlierrow,2]))$p.value #KS test does not like the outliers!
+    
 
     model<-t.test(resdat[,1],resdat[,2])
     MeanDelta<-model$estimate[1]-model$estimate[2]
