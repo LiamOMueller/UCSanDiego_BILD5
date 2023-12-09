@@ -472,7 +472,7 @@ for(i in 1:length(BILD_Data[,4])){
     ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,units = "in")
   }
    #####Chi Squared#####
-  if(BILD_Data[i,7]=="chi-Squared test"){
+  if(BILD_Data[i,7]=="Chi-Squared test"){
 
   n <- BILD_Data[i,32] #Sample size, Define from table
   Group1True <- BILD_Data[i,12] #P for group 1, Define from table
