@@ -1,0 +1,26 @@
+{
+    "id": "47339C2B",
+    "path": "~/GitHub/UCSanDiego_BILD5/R/DataSimulatoR.R",
+    "project_path": "R/DataSimulatoR.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1710301766830.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "875,0",
+        "scrollLine": "844"
+    },
+    "folds": "20|20|165|3|\n166|13|339|0|\n340|16|472|3|\n473|19|541|0|\n543|42|708|2|\n",
+    "lastKnownWriteTime": 1710302355,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1710302356007,
+    "read_only": false,
+    "read_only_alternatives": []
+}
