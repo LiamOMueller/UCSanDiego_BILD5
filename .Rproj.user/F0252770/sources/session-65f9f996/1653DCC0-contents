@@ -1,2 +1,0 @@
-dat<-read.csv(file = "WI24.csv")
-DataSimulatoR(dat)
