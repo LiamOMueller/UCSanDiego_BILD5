@@ -5,12 +5,12 @@ devtools::install_github("LiamOMueller/UCSanDiego_BILD5")
 library(DataSimulatoR)
 
 ?DataSimulatoR
-data<-read.csv("WI23_2.csv")
+data<-read.csv("WI24_2.csv")
 DataSimulatoR(data)
 
 
 library(Microsoft365R)
-emaillist<-read.csv("WI24.csv")
+emaillist<-read.csv("WI24_2.csv")
 
 #Authenticate with browser
 my_outlook <- get_business_outlook()
