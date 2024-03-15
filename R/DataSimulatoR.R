@@ -355,7 +355,7 @@ for(i in 1:length(BILD_Data[,4])){
     n<-BILD_Data[i,32]
     tempX<-rnorm(n=n,mean = muX,sd = sdX)
     tempdelta<-rnorm(n=n,mean = .9*delta, sd = .3*delta)
-    tempY<-tempX+tempdelta
+    tempY<-tempX-tempdelta
     nameofX <- BILD_Data[i,14] #define from table
     nameofY <- BILD_Data[i,15] #define from table
 
