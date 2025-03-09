@@ -42,8 +42,8 @@ for(i in 1:length(BILD_Data[,4])){
 
     muY <- muX + abs(rnorm(1, 0.9*delta, delta))
 
-    nameofX <- BILD_Data[i,14] #define from table
-    nameofY <- BILD_Data[i,15] #define from table
+    nameofX <- BILD_Data[i,15] #define from table
+    nameofY <- BILD_Data[i,14] #define from table
     X <- rnorm(n, muX, sdX) #creating X
     Y <- rnorm(n, muY, sdX) #creating Y
     rawvals <- cbind(X, Y) #creating data.frame
@@ -84,15 +84,23 @@ for(i in 1:length(BILD_Data[,4])){
       resultY[outlierrow]<-NA #The outlier is always in Y
       resdat<-cbind(resultX,resultY) #
       #test for normal
-    ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
-    ksYpval<-ks.test(resdat[-outlierrow,2],pnorm,mean(resdat[-outlierrow,2]),sd(resdat[-outlierrow,2]))$p.value #KS test does not like the outliers!
+    Tidydata<-pivot_longer(as.data.frame(resultdata),1:2,names_to = "IV",values_to = "DV")
+    Rawresiduals<-lm(Tidydata$DV~Tidydata$IV)$residuals
+    restidydat<-pivot_longer(as.data.frame(resdat),1:2,names_to = "IV",values_to = "DV")
+    Resresiduals<-lm(restidydat$DV~restidydat$IV)$residuals
+    ksRAW<-ks.test(Rawresiduals,pnorm,mean(Rawresiduals),sd(Rawresiduals))$p.value #KS the residuals
+    ksRES<-ks.test(Resresiduals,pnorm,mean(Resresiduals),sd(Resresiduals))$p.value #KS the residuals
     }else{
       resultX<-log(resultX)
       resultY<-log(resultY)
       resdat<-cbind(resultX,resultY)
       #test for normal
-    ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
-    ksYpval<-ks.test(resdat[,2],pnorm,mean(resdat[,2]),sd(resdat[,2]))$p.value #KS test does not like the outliers!
+      Tidydata<-pivot_longer(as.data.frame(resultdata),1:2,names_to = "IV",values_to = "DV")
+      Rawresiduals<-lm(Tidydata$DV~Tidydata$IV)$residuals
+      restidydat<-pivot_longer(as.data.frame(resdat),1:2,names_to = "IV",values_to = "DV")
+      Resresiduals<-lm(restidydat$DV~restidydat$IV)$residuals
+      ksRAW<-ks.test(Rawresiduals,pnorm,mean(Rawresiduals),sd(Rawresiduals))$p.value #KS the residuals
+      ksRES<-ks.test(Resresiduals,pnorm,mean(Resresiduals),sd(Resresiduals))$p.value
     }
 
 
@@ -107,20 +115,23 @@ for(i in 1:length(BILD_Data[,4])){
     #make the figures
 
     figdata<-as.data.frame(resdat)
+    RawresidualsTestFigs<-data.frame(Rawresiduals)
+    ResresidualsTestFigs<-data.frame(Resresiduals)
+
     tidyfigdata<-tidyr::pivot_longer(data = figdata[,1:2],cols = 1:2,names_to = "group",values_to = "response")
     if(BILD_Data[i,32]<40){
       bins<-15
     }else{
       bins<-30
     }
-    histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
+    histX <- ggplot2::ggplot(RawresidualsTestFigs, aes(x=Rawresiduals))+
       geom_histogram(bins = bins,fill="navyblue")+
-      theme_minimal_grid()+
-      xlab(nameofX)
-    histY<-ggplot2::ggplot(figdata,aes(x=resultY))+
+      theme_minimal()+
+      xlab("Untransformed Residuals")
+    histY<-ggplot2::ggplot(ResresidualsTestFigs,aes(x=Resresiduals))+
       geom_histogram(bins = bins,fill="navyblue")+
-      theme_minimal_grid()+
-      xlab(nameofY)
+      theme_minimal()+
+      xlab("Transfomred Residuals")
     fig<-ggplot2::ggplot(tidyfigdata, aes(x=group,y = response))+
       geom_boxplot()+
       theme_classic()+
@@ -138,10 +149,10 @@ for(i in 1:length(BILD_Data[,4])){
     tplotdat<-data.frame(xaxis,yaxis)
     text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
       annotate("text",x = 2,y = 10,label="Tests for Normallity")+
-      annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
-      annotate("text",x = 1.2,y = 9.5,label="p val of X =")+
-      annotate("text",x = 3,y = 9,label=round(ksYpval,4))+
-      annotate("text",x = 1.2,y = 9,label="p val of Y =")+
+      annotate("text",x = 3,y = 9.5,label=round(ksRAW,4))+
+      annotate("text",x = 1.2,y = 9.5,label="p val of raw =")+
+      annotate("text",x = 3,y = 9,label=round(ksRES,4))+
+      annotate("text",x = 1.2,y = 9,label="Transformed =")+
       annotate("text",x = 6,y = 10,label="Coefficents")+
       annotate("text",x = 5.7,y = 9.5,label="delta X = ")+
       annotate("text",x = 6,y = 9,label="t stat =")+
@@ -197,7 +208,6 @@ for(i in 1:length(BILD_Data[,4])){
      transformY<-Y
      transformY[round(length(Y)/4)]<-muY*10.2
      transformZ<-Z
-     transformZ[round(length(Z)/4)]<-muZ*20.2 #This should be fixed in future classes!
      transformX <- X
 
    }
@@ -222,25 +232,30 @@ for(i in 1:length(BILD_Data[,4])){
    resultX <- finalX
    resultY <- finalY
    resultZ <- finalZ
-   resultdata <- cbind(resultX,resultY,resultZ)
+   resultdata <- data.frame(resultX,resultY,resultZ)
+   tidyresults<- tidyr::pivot_longer(resultdata,1:3,names_to = "IV",values_to = "DV")
    if(BILD_Data[i,4] %% 2!=0){ #remove the outlier that was put in if the pid was odd, else transform exp data, Outlers are in the Y
-     outlierrow<-(round(length(resultdata[,2])/4))
-     resdat<-resultdata[-outlierrow,]
+     outlierrow<-which.max(tidyresults$DV)
+     resdat<-tidyresults[-outlierrow,]
    }else{
      resultX<-log(resultX)
      resultY<-log(resultY)
      resultZ<-log(resultZ)
-     resdat<-cbind(resultX,resultY,resultZ)
+     untidyresdat<-data.frame(resultX,resultY,resultZ)
+     resdat<-tidyr::pivot_longer(untidyresdat,1:3,names_to = "IV",values_to = "DV")
    }
    #test for normal
-   ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
-   ksYpval<-ks.test(resdat[,2],pnorm,mean(resdat[,2]),sd(resdat[,2]))$p.value
-   ksZpval<-ks.test(resdat[,3],pnorm,mean(resdat[,3]),sd(resdat[,3]))$p.value
+   BadmodResiduals <-lm(tidyresults$DV~tidyresults$IV)$residuals
+   GoodmodResidulas<-lm(resdat$DV~resdat$IV)$residuals
+   ksRAW<-ks.test(BadmodResiduals,pnorm,mean(BadmodResiduals),sd(BadmodResiduals))$p.value
+   ksRes<-ks.test(GoodmodResidulas,pnorm,mean(GoodmodResidulas),sd(GoodmodResidulas))$p.value
 
-   figdata<-as.data.frame(resdat)
-   tidydata<-tidyr::pivot_longer(data = figdata,cols = 1:3,names_to = "group",values_to = "response")
 
-   model<-lm(tidydata$response~tidydata$group)
+
+
+   tidydata<-resdat
+
+   model<-lm(tidydata$DV~tidydata$IV)
    modsum<-summary(model)
    modaov<-anova(model)
    rsquare<-modsum$r.squared
@@ -248,32 +263,34 @@ for(i in 1:length(BILD_Data[,4])){
    fstat<-modaov$`F value`[1]
   #Make the tukeytest
    tukeydata<-tidydata
-   tukeydata$group<-replace(tukeydata$group,tukeydata$group=="resultX",nameofX)
-   tukeydata$group<-replace(tukeydata$group,tukeydata$group=="resultY",nameofY)
-   tukeydata$group<-replace(tukeydata$group,tukeydata$group=="resultZ",nameofZ)
-    aovmod<-aov(tukeydata$response~tukeydata$group)
+   tukeydata$IV<-replace(tukeydata$IV,tukeydata$IV=="resultX",nameofX)
+   tukeydata$IV<-replace(tukeydata$IV,tukeydata$IV=="resultY",nameofY)
+   tukeydata$IV<-replace(tukeydata$IV,tukeydata$IV=="resultZ",nameofZ)
+    aovmod<-aov(tukeydata$DV~tukeydata$IV)
    Tukeymod<-TukeyHSD(aovmod)
-   Tukeykey<-Tukeymod$`tukeydata$group`
+   Tukeykey<-Tukeymod$`tukeydata$IV`
    #make the figures
+
+   #Make residuals DF
+   Badresids<-data.frame(BadmodResiduals)
+   Goodresids<-data.frame(GoodmodResidulas)
 
    if(BILD_Data[i,32]<40){
      bins<-15
    }else{
      bins<-30
    }
-   histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
+   histX <- ggplot2::ggplot(Badresids, aes(x=BadmodResiduals))+
      geom_histogram(bins = bins,fill="navyblue")+
-     theme_minimal_grid()+
-     xlab(nameofX)
-   histY<-ggplot2::ggplot(figdata,aes(x=resultY))+
+     theme_minimal()+
+     xlab("Untransformed residuals")
+   histY<-ggplot2::ggplot(Goodresids,aes(x=GoodmodResidulas))+
      geom_histogram(bins = bins,fill="navyblue")+
-     theme_minimal_grid()+
-     xlab(nameofY)
-   histZ<-ggplot2::ggplot(figdata,aes(x=resultZ))+
-     geom_histogram(bins = bins,fill="navyblue")+
-     theme_minimal_grid()+
-     xlab(nameofZ)
-   fig<-ggplot2::ggplot(tidydata, aes(x=group,y = response))+
+     theme_minimal()+
+     xlab("Transformed residuals")
+   histZ<-ggplot2::ggplot()+
+     theme_void()
+   fig<-ggplot2::ggplot(tidydata, aes(x=IV,y = DV))+
      geom_boxplot()+
      theme_classic()+
      scale_x_discrete(labels=c("resultX" = nameofX,"resultY"=nameofY,"resultZ"=nameofZ))+
@@ -290,12 +307,10 @@ for(i in 1:length(BILD_Data[,4])){
    tplotdat<-data.frame(xaxis,yaxis)
    text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
      annotate("text",x = 2,y = 10,label="Tests for Normallity")+
-     annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
-     annotate("text",x = 1.2,y = 9.5,label="p val of X =")+
-     annotate("text",x = 3,y = 9,label=round(ksYpval,4))+
-     annotate("text",x = 1.2,y = 9,label="p val of Y =")+
-     annotate("text",x = 3,y = 8.5,label=round(ksZpval,4))+
-     annotate("text",x = 1.2,y = 8.5,label="p val of Z =")+
+     annotate("text",x = 3,y = 9.5,label=round(ksRAW,4))+
+     annotate("text",x = 1.2,y = 9.5,label="p val of Raw =")+
+     annotate("text",x = 3,y = 9,label=round(ksRes,4))+
+     annotate("text",x = 1.2,y = 9,label="Transformed =")+
      annotate("text",x = 6,y = 10,label="Coefficents")+
      annotate("text",x = 6,y = 9.5,label="F stat =")+
      annotate("text",x = 7.5,y = 9.5,label=round(fstat,5))+
@@ -404,6 +419,7 @@ for(i in 1:length(BILD_Data[,4])){
     ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
     ksYpval<-ks.test(resdat[,2],pnorm,mean(resdat[,2]),sd(resdat[,2]))$p.value
     ksDeltapval<-ks.test(resdat[,3],pnorm,mean(resdat[,3]),sd(resdat[,3]))$p.value
+    ksPreDelta<-ks.test(predelta,pnorm,mean(predelta),sd(predelta))$p.value
 
     model<-t.test(resdat[,1],resdat[,2],paired = TRUE)
     MeanDelta<-model$estimate
@@ -424,17 +440,18 @@ for(i in 1:length(BILD_Data[,4])){
     }
     histdelta <- ggplot2::ggplot(figdata, aes(x=deltacol))+
       geom_histogram(bins = bins,fill="navyblue")+
-      theme_minimal_grid()+
-      xlab('Delta')
+      theme_minimal()+
+      xlab('Fixed deltas')
     histpredelta<-ggplot2::ggplot(rawdat,aes(x=predelta))+
       geom_histogram(bins = bins,fill="navyblue")+
-      theme_minimal_grid()+
-      xlab('Delta')
-    fig<-ggplot2::ggplot(tidyfigdata, aes(x=group,y = response))+
+      theme_minimal()+
+      xlab('Raw deltas')
+    fig<-ggplot2::ggplot(figdata, aes(y = deltacol))+
       geom_boxplot()+
       theme_classic()+
-      scale_x_discrete(labels=c("resultX" = nameofX,"resultY"=nameofY))+
-      xlab("Group")+
+      geom_hline(yintercept=0, linetype="dashed",
+                 color = "red", size=2)+
+      xlab("Delta")+
       ylab("Response")
     #Now lets make some text go in this box and then we have a little mini rubric!
     if(BILD_Data[i,4] %% 2==0){
@@ -447,8 +464,10 @@ for(i in 1:length(BILD_Data[,4])){
     tplotdat<-data.frame(xaxis,yaxis)
     text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
       annotate("text",x = 2,y = 10,label="Tests for Normallity")+
-      annotate("text",x = 3,y = 9.5,label=round(ksDeltapval,4))+
-      annotate("text",x = 1.5,y = 9.5,label="p val =")+
+      annotate("text",x = 3,y = 9.5,label=round(ksPreDelta,4))+
+      annotate("text",x = 1.5,y = 9.5,label="Raw Data p val =")+
+      annotate("text",x = 3,y = 9,label=round(ksDeltapval,4))+
+      annotate("text",x = 1,y = 9,label="Transformed =")+
       annotate("text",x = 6,y = 10,label="Coefficents")+
       annotate("text",x = 5.7,y = 9.5,label="delta X = ")+
       annotate("text",x = 6,y = 9,label="t stat =")+
@@ -629,13 +648,15 @@ if(BILD_Data[i,4] %% 2!=0){ #remove the outlier that was put in if the pid was o
   outlierrow<-(round(length(resultdata[,1])/4))
   resdat<-resultdata[-outlierrow,]
 }else{
-  resultX<-log(resultX)
+  resultY<-log(resultY)
   resdat<-cbind(resultX,resultY)
 }
 
 
 
 #test for normal
+ksRawX<-ks.test(resultdata[,1],pnorm,mean(resultdata[,1]),sd(resultdata[,1]))$p.value
+ksRawY<-ks.test(resultdata[,2],pnorm,mean(resultdata[,2]),sd(resultdata[,2]))$p.value
 ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
 ksYpval<-ks.test(resdat[,2],pnorm,mean(resdat[,2]),sd(resdat[,2]))$p.value
 
@@ -659,11 +680,11 @@ if(BILD_Data[i,32]<40){
 }
 histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
   geom_histogram(bins = bins,fill="navyblue")+
-  theme_minimal_grid()+
+  theme_minimal()+
   xlab(nameofX)
 histY<- ggplot2::ggplot(figdata, aes(x=resultY))+
   geom_histogram(bins = bins,fill="navyblue")+
-  theme_minimal_grid()+
+  theme_minimal()+
   xlab(nameofY)
 fig<-ggplot2::ggplot(figdata, aes(x=resultX,y = resultY))+
   geom_point()+
@@ -682,10 +703,16 @@ yaxis<-1:10
 tplotdat<-data.frame(xaxis,yaxis)
   text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
     annotate("text",x = 2,y = 10,label="Tests for Normallity")+
-    annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
-    annotate("text",x = 1.5,y = 9.5,label="p val of X =")+
-    annotate("text",x = 3,y = 9,label=round(ksYpval,4))+
-    annotate("text",x = 1.5,y = 9,label="p val of Y =")+
+
+    annotate("text",x = 3,y = 9.5,label=round(ksRawX,4))+
+    annotate("text",x = 1.5,y = 9.5,label="Raw X =")+
+    annotate("text",x = 3,y = 9,label=round(ksRawY,4))+
+    annotate("text",x = 1.5,y = 9,label="Raw Y =")+
+
+    annotate("text",x = 3,y = 8.5,label=round(ksXpval,4))+
+    annotate("text",x = 1.5,y = 8.5,label="Fixed X =")+
+    annotate("text",x = 3,y = 8,label=round(ksYpval,4))+
+    annotate("text",x = 1.5,y = 8,label="Fixed Y =")+
     annotate("text",x = 6,y = 10,label="Coefficents")+
     annotate("text",x = 6,y = 9.5,label="Intercept = ")+
     annotate("text",x = 6,y = 9,label="Slope =")+
@@ -797,7 +824,7 @@ ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,un
       outlierrow<-(round(length(resultdata[,1])/4))
       resdat<-resultdata[-outlierrow,]
     }else{
-      resultX<-log(resultX)
+      resultY<-log(resultY)
       resdat<-cbind(resultX,resultY)
     }
 
@@ -806,6 +833,9 @@ ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,un
     #test for normal
     ksXpval<-ks.test(resdat[,1],pnorm,mean(resdat[,1]),sd(resdat[,1]))$p.value
     ksYpval<-ks.test(resdat[,2],pnorm,mean(resdat[,2]),sd(resdat[,2]))$p.value
+    ksRawX<-ks.test(resultdata[,1],pnorm,mean(resultdata[,1]),sd(resultdata[,1]))$p.value
+    ksRawY<-ks.test(resultdata[,2],pnorm,mean(resultdata[,2]),sd(resultdata[,2]))$p.value
+
 
 
 
@@ -824,11 +854,11 @@ ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,un
     }
     histX <- ggplot2::ggplot(figdata, aes(x=resultX))+
       geom_histogram(bins = bins,fill="navyblue")+
-      theme_minimal_grid()+
+      theme_minimal()+
       xlab(nameofX)
     histY<- ggplot2::ggplot(figdata, aes(x=resultY))+
       geom_histogram(bins = bins,fill="navyblue")+
-      theme_minimal_grid()+
+      theme_minimal()+
       xlab(nameofY)
     fig<-ggplot2::ggplot(figdata, aes(x=resultX,y = resultY))+
       geom_point()+
@@ -847,10 +877,15 @@ ggplot2::ggsave(filename = fignames[i],plot = plotgrid,width = 10,height = 10,un
     tplotdat<-data.frame(xaxis,yaxis)
     text<-ggplot2::ggplot(tplotdat,aes(x=xaxis,y=yaxis))+
       annotate("text",x = 2,y = 10,label="Tests for Normallity")+
-      annotate("text",x = 3,y = 9.5,label=round(ksXpval,4))+
-      annotate("text",x = 1.5,y = 9.5,label="p val of X =")+
-      annotate("text",x = 3,y = 9,label=round(ksYpval,4))+
-      annotate("text",x = 1.5,y = 9,label="p val of Y =")+
+      annotate("text",x = 3,y = 9.5,label=round(ksRawX,4))+
+      annotate("text",x = 1.5,y = 9.5,label="Raw X =")+
+      annotate("text",x = 3,y = 9,label=round(ksRawY,4))+
+      annotate("text",x = 1.5,y = 9,label="Raw Y =")+
+
+      annotate("text",x = 3,y = 8.5,label=round(ksXpval,4))+
+      annotate("text",x = 1.5,y = 8.5,label="Fixed X =")+
+      annotate("text",x = 3,y = 8,label=round(ksYpval,4))+
+      annotate("text",x = 1.5,y = 8,label="Fixed Y =")+
       annotate("text",x = 6,y = 10,label="Coefficents")+
       annotate("text",x = 6,y = 9.5,label="r = ")+
       annotate("text",x = 7.5,y = 9.5,label=round(cor,5))+
